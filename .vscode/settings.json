@@ -1,0 +1,24 @@
+{
+    "C_Cpp.default.cppStandard": "c++11",
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/accumulator/include",
+        "${workspaceFolder}/common/include",
+        "${workspaceFolder}/lidar_detector/include",
+        "${workspaceFolder}/mono_detector/include",
+        "${workspaceFolder}/radar_detector/include",
+        "${workspaceFolder}/stereo_detector/include",
+        "${workspaceFolder}/urdf_calibration/include",
+        "/usr/include",
+        "/usr/include/eigen3",
+        "/usr/local/include"
+    ],
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/optimization/src",
+        "${workspaceFolder}/optimization/lib/icp"
+    ],
+    "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/optimization/src",
+        "${workspaceFolder}/optimization/lib/icp"
+    ]
+}

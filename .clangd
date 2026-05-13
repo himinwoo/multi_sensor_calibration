@@ -1,0 +1,13 @@
+CompileFlags:
+  Add:
+    - -std=c++11
+    - -I/home/himinwoo/calib_ws/multi_sensor_calibration/accumulator/include
+    - -I/home/himinwoo/calib_ws/multi_sensor_calibration/common/include
+    - -I/home/himinwoo/calib_ws/multi_sensor_calibration/lidar_detector/include
+    - -I/home/himinwoo/calib_ws/multi_sensor_calibration/mono_detector/include
+    - -I/home/himinwoo/calib_ws/multi_sensor_calibration/radar_detector/include
+    - -I/home/himinwoo/calib_ws/multi_sensor_calibration/stereo_detector/include
+    - -I/home/himinwoo/calib_ws/multi_sensor_calibration/urdf_calibration/include
+    - -I/usr/include
+    - -I/usr/include/eigen3
+    - -I/usr/local/include

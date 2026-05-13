@@ -1,0 +1,4 @@
+[tool.pyright]
+extraPaths = ["optimization/src", "optimization/lib/icp"]
+
+[tool.pylsp]
