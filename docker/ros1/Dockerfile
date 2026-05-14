@@ -76,6 +76,9 @@ RUN printf '%s\n' \
     'source /opt/ros/melodic/setup.bash' \
     'if [ -f /workspace/calib_ws/devel/setup.bash ]; then source /workspace/calib_ws/devel/setup.bash; fi' \
     'alias cb="cd /workspace/calib_ws && catkin_make"' \
+    'alias cm="cd /workspace/calib_ws && catkin_make && cd - >/dev/null"' \
+    'alias sd="source /workspace/calib_ws/devel/setup.bash"' \
+    'alias cmsd="cm && sd"' \
     'alias cs="cd /workspace/calib_ws/src/multi_sensor_calibration"' \
     'alias cw="cd /workspace/calib_ws"' \
     >> /root/.bashrc
