@@ -23,7 +23,10 @@ catkin_make
 source devel/setup.bash
 ```
 
-- C++11 is required (`add_compile_options(-std=c++11)` in some packages).
+- C++11 is required. Packages use inconsistent methods:
+  - `accumulator`: `add_compile_options(-std=c++11)`
+  - `stereo_detector`, `mono_detector`: `set(CMAKE_CXX_STANDARD 11)`
+  - `urdf_calibration`: `set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")`
 - CMake minimum version is 2.8.3 across packages.
 - Include directories in `CMakeLists.txt` use `include_directories(include/${PROJECT_NAME})`.
 
@@ -71,7 +74,11 @@ python3 src/main.py --lidar data/example_data/lidar.csv \
   --calibration-mode 3 --visualise
 ```
 
-Calibration modes: see `optimization/src/optimization/optimize.py` function `joint_optimization`.
+Calibration modes (see `optimization/src/optimization/optimize.py` function `joint_optimization`):
+- `0`: PSE with unknown observation covariance matrices
+- `1`: PSE with known observation covariance matrices
+- `2`: MCPE (Minimally Connected Pose Estimation)
+- `3`: FCPE/FPCE (Fully Connected Pose Estimation) — default
 
 ### Manual ROS nodes
 ```bash
@@ -83,16 +90,28 @@ rosrun accumulator accumulator
 rosrun optimization server.py
 ```
 
+## Detector Topics and Message Types
+
+| Detector | Subscribes | Publishes |
+|---|---|---|
+| `lidar_detector` | `/velodyne_points` (`sensor_msgs/PointCloud2`, **must include ring number**) | `lidar_pattern`, `lidar_pattern_markers` |
+| `stereo_detector` | `/ueye/left/image_rect_color`, `/ueye/left/camera_info`, `/ueye/right/camera_info`, `/ueye/disparity` | `stereo_pattern`, `stereo_pattern_markers` |
+| `mono_detector` | `/ueye/left/image_rect_color`, `/ueye/left/camera_info` | `mono_pattern` |
+| `radar_detector` | `/radar_converter/detections` (`radar_msgs/RadarDetectionArray`) | `radar_pattern`, `radar_marker` |
+
+For multiple sensors of the same modality, launch multiple detector instances with **remapped topics**.
+
 ## Configuration
 
 - **Detector configs** (YAML): `lidar_detector/config/config.yaml`, `stereo_detector/config/config.yaml`, `mono_detector/config/config.yaml`
-- **Radar detector** config is passed as ROS parameters (see `multi_sensor_calibration_launch/launch/detectors.launch`)
+- **Radar detector** config is passed as ROS parameters (see `multi_sensor_calibration_launch/launch/detectors.launch`). Parameters: `minimum_RCS`, `maximum_RCS`, `min_range_object`, `max_range_object`, `selection_basis` (`rcs` or `range`), `selection_criterion` (`min` or `max`).
 - **Sensor setup / calibration board geometry**: edit `optimization/src/optimization/config.py` and `optimization/src/optimization/calibration_board.py`
 - **Calibration mode / reference sensor** can be changed via rosparam:
   ```bash
   rosparam set /optimizer/calibration_mode <mode>
   rosparam set /optimizer/reference_sensor <sensor_name>
   ```
+- **Accumulator topics** are configured via the ROS parameter `sensors_topic` (list of topic names to record).
 
 ## Service Calls (Accumulator)
 
@@ -112,23 +131,27 @@ rosservice call /accumulator/load "data: {data: '<path>.yaml'}"
 ## URDF Update
 
 ```bash
-rosrun urdf_calibration urdf_calibration <input_urdf> <calibration_yaml> <output_urdf> <link_to_update> <joint_to_update>
+rosrun urdf_calibration urdf_calibration_cli <input_urdf> <calibration_yaml> <output_urdf> <link_to_update> <joint_to_update>
 ```
 
 Repeat for every sensor. Do **not** update the same link/joint twice (incorrect result if sensors share a common parent). Example script: `multi_sensor_calibration_launch/scripts/update_prius_urdf.sh`.
 
 ## Testing
 
-- No formal test suite is configured. `catkin_make run_tests` is not wired up.
-- `mono_detector/test/yaml.cpp` and `urdf_calibration/test/` contain some manual test assets, but they are not integrated into the build.
+- **No formal test suite is configured globally.** `catkin_make run_tests` is not wired up for most packages.
+- Only `mono_detector` has a gtest target (`mono_detector_yaml_test`) wired via `catkin_add_gtest` in its `CMakeLists.txt`.
+- `urdf_calibration/test/` contains manual test assets, but they are not integrated into the build.
 - To verify changes, run the standalone optimizer examples in `optimization/data/example_data/`.
 
 ## Important Conventions
 
 - **Python package setup**: `optimization` uses `catkin_pkg.python_setup.generate_distutils_setup` in `setup.py`; do not modify package paths without updating `CMakeLists.txt` and `setup.py` together.
+  - Note: `setup.py` has a duplicate key in `package_dir` (`{'': 'src', '': 'lib/icp'}`), so the effective root is `lib/icp`. Both `main.py` and `server.py` manually append `lib/icp` to `sys.path` at runtime.
 - **Correspondence methods**: Two methods exist for lidar-camera point correspondences. The recommended one reorders detections based on a reference sensor using centroid-based initial pose. See README section "How are the (point) correspondences determined".
 - **Partial FOV calibration**: Supported but experimental. Requires `mode = 'remove_detections'` in `config.py` (or `outlier_removal` rosparam for ROS node) and one sensor seeing all board locations as reference.
 - **Multiple sensors of same modality**: Supported. Launch multiple detector instances with remapped topics.
+- **Radar offset**: The optimizer applies an `offset_radar = 0.105` m correction (plate + trihedral corner reflector depth) in `calibration_board.py`. Adjust this if your radar target geometry differs.
+- **PCL warnings in lidar_detector**: PCL constantly throws warnings during lidar detection. These can be ignored if the four circle centers are detected correctly (visualize in RViz).
 
 ## Files That Explain the System
 
