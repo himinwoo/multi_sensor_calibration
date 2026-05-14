@@ -22,6 +22,11 @@ from catkin_pkg.python_setup import generate_distutils_setup
 # fetch values from package.xml
 setup_args = generate_distutils_setup(
     packages=['optimization'],
-    package_dir={'': 'src', '': 'lib/icp'})
+    package_dir={
+        'optimization': 'src/optimization',
+        '': 'lib/icp',
+    },
+    py_modules=['icp'],
+)
 
 setup(**setup_args)

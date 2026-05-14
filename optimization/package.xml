@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
     <name>optimization</name>
     <version>0.0.0</version>
     <description>The optimization package</description>
@@ -13,10 +13,11 @@
     <build_depend>std_msgs</build_depend>
     <build_depend>accumulator</build_depend>
 
-    <run_depend>message_runtime</run_depend>
-    <run_depend>rospy</run_depend>
-    <run_depend>std_msgs</run_depend>
-    <run_depend>accumulator</run_depend>
+    <exec_depend>message_runtime</exec_depend>
+    <exec_depend>rospy</exec_depend>
+    <exec_depend>std_msgs</exec_depend>
+    <exec_depend>accumulator</exec_depend>
+    <exec_depend>ros_numpy</exec_depend>
 
     <buildtool_depend>catkin</buildtool_depend>
 </package>
