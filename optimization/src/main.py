@@ -17,7 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-sys.path.append('lib/icp')
+import os
+# Resolve lib/icp path relative to this script for robust imports
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_icp_dir = os.path.join(_script_dir, '..', 'lib', 'icp')
+if os.path.isdir(_icp_dir):
+    sys.path.append(_icp_dir)
 import numpy as np
 import itertools
 import pickle

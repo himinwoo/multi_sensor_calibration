@@ -17,11 +17,22 @@
 
 import sys
 import os
-import rospkg
 NAME = 'optimizer'
-pkg_name = rospkg.get_package_name(os.path.dirname(os.path.realpath(__file__)))
-pkg_dir = rospkg.RosPack().get_path(pkg_name)
-sys.path.append(pkg_dir + '/lib/icp') #Added for lib/icp folder in ROS
+# Resolve lib/icp path relative to this script for robust imports
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_icp_dir = os.path.join(_script_dir, '..', 'lib', 'icp')
+if os.path.isdir(_icp_dir):
+    sys.path.append(_icp_dir)
+# Fallback to rospkg if running in a ROS environment where the above is insufficient
+try:
+    import rospkg
+    pkg_name = rospkg.get_package_name(os.path.dirname(os.path.realpath(__file__)))
+    pkg_dir = rospkg.RosPack().get_path(pkg_name)
+    _rospkg_icp_dir = os.path.join(pkg_dir, 'lib', 'icp')
+    if os.path.isdir(_rospkg_icp_dir) and _rospkg_icp_dir not in sys.path:
+        sys.path.append(_rospkg_icp_dir)
+except Exception:
+    pass
 from accumulator.srv import *
 import rospy
 import numpy as np
